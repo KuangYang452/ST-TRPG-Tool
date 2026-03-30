@@ -1,157 +1,447 @@
-# ST-TRPG-Tool 开发指南
+# ST-TRPG-Tool UI 扩展开发指南
 
 ## 项目概述
 
-**ST-TRPG-Tool** 是基于 TypeScript 和 Webpack 构建的 SillyTavern 服务器插件。为 AI 智能体提供 TRPG（桌面角色扮演游戏）工具箱，包括骰子、地图、规则书和角色卡查询等功能。该插件通过 SillyTavern 的 Express 路由器暴露 HTTP 端点。
+**ST-TRPG-Tool** 是基于 JavaScript 和 CSS 构建的 SillyTavern UI 扩展。为用户界面提供 TRPG（桌面角色扮演游戏）工具箱，包括骰子、地图、规则书查询等功能。该扩展通过 SillyTavern 的扩展系统集成到设置面板中。
 
 ### 架构
 
-- **插件模式**：实现 SillyTavern 插件接口，包含 `init()`、`exit()` 和 `info` 导出
-- **构建目标**：Node.js CommonJS 模块（打包为 `dist/plugin.js`）
-- **运行时**：加载到 SillyTavern 服务器中，通过 HTTP POST 端点访问
-- **核心文件**：`src/index.ts` 定义插件契约并注册路由
+- **扩展类型**：UI 扩展（Third-party Extension）
+- **安装位置**：`public/scripts/extensions/third-party/st-trpg-tool/`
+- **运行环境**：浏览器端，运行在 SillyTavern 的界面中
+- **核心文件**：`index.js` 定义扩展逻辑，`manifest.json` 定义扩展信息
 
-## 开发工作流
+## 文件结构
 
-### 构建命令
-
-```bash
-npm run build:dev    # 开发构建（未压缩，更快）
-npm run build        # 生产构建（使用 Terser 压缩）
-npm run lint         # 检查 TypeScript + ESLint 规则
-npm run lint:fix     # 自动修复代码风格问题
+```
+st-trpg-tool/
+├── manifest.json         # 扩展配置和元数据
+├── index.js             # 主扩展逻辑入口
+├── style.css            # 扩展样式
+├── settings.html        # 设置界面模板（可选）
+├── README.md            # 说明文档
+└── .github/
+    └── copilot-instructions.md
 ```
 
-构建后，将 `dist/plugin.js` 复制到 SillyTavern 的 `/plugins` 文件夹进行测试。
+## manifest.json 配置
 
-### TypeScript 配置
+`manifest.json` 是扩展的元数据文件，定义扩展如何被 SillyTavern 加载：
 
-- **目标**：ES6、CommonJS 模块格式
-- **严格模式**：启用（必需）
-- **Source Maps**：启用，便于调试
-- **输出目录**：tsc 输出到 `./out`（Webpack 覆盖为 `./dist`）
-
-## 插件开发模式
-
-### 路由注册模式
-
-新路由必须在 `init()` 函数中按以下结构实现：
-
-```typescript
-// 带中间件的路由（例如 JSON 解析）
-router.post('/endpoint-name', jsonParser, async (req, res) => {
-    try {
-        const data = req.body;
-        // 处理请求
-        return res.json({ result: 'data' });
-    } catch (error) {
-        console.error(chalk.red(MODULE_NAME), '错误消息', error);
-        return res.status(500).send('内部服务器错误');
+```json
+{
+    "display_name": "ST-TRPG-Tool",
+    "loading_order": 9,
+    "js": "index.js",
+    "css": "style.css",
+    "author": "KuangYang452",
+    "version": "1.0.0",
+    "homePage": "https://github.com/KuangYang452/ST-TRPG-Tool",
+    "minimum_client_version": "1.10.0",
+    "hooks": {
+        "install": "onInstall",
+        "activate": "onActivate"
     }
-});
-
-// 不带中间件的路由
-router.post('/probe', (_req, res) => {
-    return res.sendStatus(204);
-});
-```
-
-### 日志记录约定
-
-始终使用 `chalk` 库配合 `MODULE_NAME` 常量进行彩色控制台输出：
-
-```typescript
-console.log(chalk.green(MODULE_NAME), '插件已加载！');
-console.error(chalk.red(MODULE_NAME), '错误描述', error);
-```
-
-### 插件接口要求
-
-所有插件必须导出默认的 `Plugin` 对象，包含：
-
-```typescript
-interface Plugin {
-    init: (router: Router) => Promise<void>;      // 服务器启动时调用
-    exit: () => Promise<void>;                     // 服务器关闭时调用
-    info: PluginInfo;                              // 插件元数据
-}
-
-interface PluginInfo {
-    id: string;           // 唯一标识符（例如 'st-trpg-tools'）
-    name: string;         // 显示名称
-    description: string;  // 用户显示的描述
 }
 ```
 
-## 依赖项与约定
+### manifest.json 字段说明
 
-- **body-parser**：用于解析 JSON 请求体（在路由中导入使用作为中间件）
-- **chalk**：用于彩色控制台输出（使用 `new Chalk()` 实例）
-- **express**：SillyTavern 提供的 Router 接口，仅添加路由，不创建新 Router
-- **模块系统**：项目使用 CommonJS（`"type": "commonjs"`），不使用 `import()` 动态导入语法
+- **display_name** ✅ 必需 - 在扩展管理器中显示的名称
+- **js** ✅ 必需 - 主 JavaScript 文件路径
+- **css** - 可选 - 样式文件路径
+- **author** ✅ 必需 - 开发者名称或联系方式
+- **version** - 可选 - 版本号
+- **loading_order** - 可选 - 加载顺序（值越高加载越晚）
+- **minimum_client_version** - 可选 - 最低 SillyTavern 版本要求
+- **homePage** - 可选 - 扩展主页 URL
+- **hooks** - 可选 - 生命周期钩子映射
 
-## 代码风格与质量检查
+## 扩展初始化模式
 
-- **解析器**：@typescript-eslint/parser
-- **环境**：Node.js（无浏览器、无 DOM）
-- **关键规则**：
-  - 未使用变量报错（允许函数参数）
-  - `no-control-regex` 禁用（正则表达式可能包含控制字符）
-  - 循环条件可以是常量（如 `while(true)`）
-- **忽略目录**：`node_modules/`、`dist/`、`out/`、`bin/`
+扩展使用 `SillyTavern.getContext()` API 来访问应用状态和功能：
 
-## 集成点
+```javascript
+// index.js 中的初始化
+const MODULE_NAME = 'st-trpg-tool';
 
-- **入口点**：SillyTavern 调用 `init(router)` 并存储路由
-- **HTTP 端点**：AI 智能体通过 POST 访问 `http://server/plugin-endpoints`
-- **关闭钩子**：服务器终止时调用 `exit()`（如需清理资源）
+// 获取 SillyTavern 上下文
+const {
+    extensionSettings,
+    saveSettingsDebounced,
+    eventSource,
+    event_types,
+} = SillyTavern.getContext();
 
-## 插件安装说明
+// 定义默认设置
+const defaultSettings = Object.freeze({
+    diceEnabled: true,
+    autoRoll: false
+});
 
-### SillyTavern 安装步骤
+// 获取或初始化设置
+function getSettings() {
+    if (!extensionSettings[MODULE_NAME]) {
+        extensionSettings[MODULE_NAME] = structuredClone(defaultSettings);
+    }
+    return extensionSettings[MODULE_NAME];
+}
 
-1. **构建插件**：运行 `npm run build` 生成生产版本
-2. **复制插件**：将整个项目目录复制到 SillyTavern 的 `/plugins` 文件夹
-3. **启用插件**：确保 `config.yaml` 中设置 `enableServerPlugins: true`
-4. **重启 SillyTavern**：重启服务器以加载插件
+// 应用启动时的激活钩子
+export async function onActivate() {
+    console.log('🎲 ST-TRPG-Tool 扩展已激活');
+    await initializeExtension();
+}
 
-### 插件目录结构
+// 扩展安装时的钩子
+export async function onInstall() {
+    console.log('🎲 ST-TRPG-Tool 扩展已安装');
+}
+
+// 初始化扩展
+async function initializeExtension() {
+    // 加载设置
+    loadSettings();
+
+    // 绑定事件
+    bindEventListeners();
+
+    console.log('🎲 ST-TRPG-Tool 初始化完成');
+}
+
+// 加载设置
+function loadSettings() {
+    const settings = getSettings();
+    $('#trpg_dice_enabled').prop('checked', settings.diceEnabled).trigger('input');
+}
+
+// 绑定事件监听
+function bindEventListeners() {
+    $('#trpg_roll_dice').on('click', onDiceRollClick);
+    $('#trpg_dice_enabled').on('input', onSettingChange);
+}
+
+// 处理骰子投掷
+function onDiceRollClick() {
+    const diceType = $('#trpg_dice_type').val();
+    const [count, sides] = diceType.split('d').map(Number);
+    const results = rollDice(count, sides);
+    
+    $('#trpg_dice_result').text(`${count}d${sides}: [${results.join(', ')}]`);
+    toastr.success(`骰子结果: ${results.reduce((a, b) => a + b)}`);
+}
+
+// 处理设置变更
+function onSettingChange(event) {
+    const setting = event.target.id.replace('trpg_', '');
+    const value = $(event.target).prop('checked');
+
+    const settings = getSettings();
+    settings[setting] = value;
+    saveSettingsDebounced();
+}
+
+// 投骰子逻辑
+function rollDice(count, sides) {
+    const results = [];
+    for (let i = 0; i < count; i++) {
+        results.push(Math.floor(Math.random() * sides) + 1);
+    }
+    return results;
+}
+```
+
+## 使用 getContext() API
+
+`getContext()` 提供访问 SillyTavern 应用状态的稳定接口：
+
+```javascript
+const {
+    chat,                          // 聊天记录
+    characters,                    // 角色列表
+    characterId,                   // 当前角色索引
+    extensionSettings,             // 扩展设置对象
+    saveSettingsDebounced,         // 防抖保存设置函数
+    eventSource, event_types,      // 事件系统
+    renderExtensionTemplateAsync,  // 渲染 HTML 模板
+    generateQuietPrompt,           // 在聊天上下文中生成文本
+    generateRaw,                   // 原始文本生成
+    loader,                        // 加载动画
+    Popup,                         // 弹窗工具
+    macros,                        // 宏系统
+    addLocaleData,                 // 国际化
+} = SillyTavern.getContext();
+```
+
+## HTML 模板使用
+
+使用 Handlebars 模板构建扩展 UI（settings.html）：
+
+```html
+<div class="trpg-tool-settings">
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b data-i18n="TRPG工具箱">TRPG工具箱</b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+        <div class="inline-drawer-content">
+            <div class="trpg-tool-block">
+                <label for="trpg_dice_enabled" data-i18n="启用骰子功能">
+                    启用骰子功能
+                </label>
+                <input id="trpg_dice_enabled" type="checkbox" />
+            </div>
+
+            <div class="trpg-dice-section">
+                <select id="trpg_dice_type">
+                    <option value="1d6">1d6</option>
+                    <option value="1d20">1d20</option>
+                    <option value="2d6">2d6</option>
+                </select>
+                <button id="trpg_roll_dice" class="menu_button" data-i18n="投骰子">
+                    投骰子
+                </button>
+                <div id="trpg_dice_result" style="margin-top: 5px;"></div>
+            </div>
+
+            <hr class="sysHR" />
+        </div>
+    </div>
+</div>
+```
+
+在 index.js 中渲染模板：
+
+```javascript
+const { renderExtensionTemplateAsync } = SillyTavern.getContext();
+
+async function loadUI() {
+    const settingsHtml = await renderExtensionTemplateAsync(
+        'third-party/st-trpg-tool',
+        'settings'
+    );
+    $('#extensions_settings').append(settingsHtml);
+}
+```
+
+## 事件系统
+
+监听 SillyTavern 事件：
+
+```javascript
+const { eventSource, event_types } = SillyTavern.getContext();
+
+// 监听聊天变更
+eventSource.on(event_types.CHAT_CHANGED, () => {
+    console.log('聊天已切换');
+});
+
+// 监听消息接收
+eventSource.on(event_types.MESSAGE_RECEIVED, (message) => {
+    console.log('收到消息');
+});
+
+// 监听应用准备就绪
+eventSource.on(event_types.APP_READY, () => {
+    console.log('应用准备就绪');
+});
+```
+
+常用事件：`APP_READY`、`CHAT_CHANGED`、`MESSAGE_RECEIVED`、`CHARACTER_EDITED`
+
+## 持久化设置
+
+```javascript
+const { extensionSettings, saveSettingsDebounced } = SillyTavern.getContext();
+
+const MODULE_NAME = 'st-trpg-tool';
+
+// 获取设置
+function getSettings() {
+    if (!extensionSettings[MODULE_NAME]) {
+        extensionSettings[MODULE_NAME] = {};
+    }
+    return extensionSettings[MODULE_NAME];
+}
+
+// 修改并保存
+const settings = getSettings();
+settings.option = value;
+saveSettingsDebounced();
+```
+
+## 用户反馈
+
+### 提示信息
+
+```javascript
+toastr.success('操作成功');
+toastr.error('发生错误');
+toastr.warning('警告');
+toastr.info('提示');
+```
+
+### 弹窗
+
+```javascript
+const { Popup } = SillyTavern.getContext();
+
+// 确认
+const ok = await Popup.show.confirm('确认', '确定吗？');
+
+// 输入
+const input = await Popup.show.input('输入', '请输入值', 'default');
+```
+
+### 加载动画
+
+```javascript
+const { loader } = SillyTavern.getContext();
+
+const handle = loader.show({ message: '处理中...' });
+try {
+    await operation();
+} finally {
+    await handle.hide();
+}
+```
+
+## 样式规范
+
+遵循 SillyTavern 的样式约定：
+
+```css
+/* 扩展设置容器 */
+.trpg-tool-settings {
+    margin: 10px 0;
+}
+
+/* 块级元素 */
+.trpg-tool-block {
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.trpg-tool-block label {
+    flex: 1;
+}
+
+/* 骰子投掷区域 */
+.trpg-dice-section {
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
+}
+
+/* 按钮样式 */
+#trpg_roll_dice {
+    background: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#trpg_roll_dice:hover {
+    background: #0056b3;
+}
+
+/* 结果显示 */
+#trpg_dice_result {
+    color: #28a745;
+    font-family: monospace;
+    margin-top: 5px;
+}
+```
+
+## 国际化 (i18n)
+
+在 manifest.json 中定义翻译文件：
+
+```json
+{
+    "i18n": {
+        "zh-cn": "i18n/zh-cn.json",
+        "en-us": "i18n/en-us.json"
+    }
+}
+```
+
+翻译文件格式 (i18n/zh-cn.json)：
+
+```json
+{
+    "TRPG工具箱": "TRPG工具箱",
+    "启用骰子功能": "启用骰子功能",
+    "投骰子": "投骰子",
+    "骰子结果": "骰子结果"
+}
+```
+
+## 最佳实践
+
+### 代码组织
+
+✅ 使用唯一的模块名称避免冲突  
+✅ 将功能分离到不同的函数  
+✅ 所有代码注释使用中文  
+✅ 用户界面文本使用中文  
+
+### 性能优化
+
+✅ 使用防抖保存设置  
+✅ 清理事件监听器  
+✅ 异步操作使用 async/await  
+
+### 安全性
+
+✅ 验证用户输入  
+✅ 使用 DOMPurify 清理 HTML  
+❌ 不存储敏感数据在 extensionSettings  
+❌ 避免使用 eval()  
+
+### 兼容性
+
+✅ 优先使用 getContext() API  
+✅ 使用 SillyTavern 共享库  
+✅ 定义最低版本要求  
+
+## 扩展安装
+
+### 安装步骤
+
+1. 克隆或下载仓库
+2. 复制到 `public/scripts/extensions/third-party/`
+3. 重启 SillyTavern
+
+### 目录结构
 
 ```
-plugins/
-└── st-trpg-tools/          # 插件目录名（使用 info.id）
-    ├── index.js           # 插件入口点
-    ├── dist/
-    │   └── plugin.js      # 构建输出
-    ├── package.json       # 插件元数据
-    └── src/               # 源代码（可选）
+SillyTavern/
+└── public/scripts/extensions/third-party/
+    └── st-trpg-tool/
+        ├── manifest.json
+        ├── index.js
+        ├── style.css
+        └── settings.html
 ```
 
-### 故障排除
+## 调试
 
-- **插件未加载**：检查控制台日志，确认 `enableServerPlugins: true`
-- **路由未注册**：确认插件目录名与 `info.id` 匹配
-- **构建失败**：运行 `npm run build:dev` 查看详细错误信息
+在浏览器控制台查看日志：
 
-## 代码注释与国际化
+```javascript
+const MODULE_NAME = 'ST-TRPG-Tool';
+console.log(`[${MODULE_NAME}] 消息`);
+console.error(`[${MODULE_NAME}] 错误`);
+```
 
-- **所有代码注释均使用中文编写**
-- **国际化文本默认以 zh-cn（简体中文）为准**
-- 用户界面消息、日志输出等应使用中文
+打开浏览器开发者工具（F12）查看 Console 标签页。
 
-## SillyTavern 官方标准符合性
+## 参考资源
 
-该项目严格遵循 [SillyTavern 服务器插件标准](https://docs.sillytavern.app/for-contributors/server-plugins/)：
-
-- **导出契约**：
-  - `init(router: Router): Promise<void>` - 接收 Express 路由器，返回 Promise
-  - `exit(): Promise<void>` - 关闭钩子，必须返回 Promise
-  - `info: PluginInfo` - 包含 `id`、`name`、`description` 的插件元数据
-
-- **路由路径**：注册的路由自动映射到 `/api/plugins/{id}/{route}` 路径
-  - 例如：`router.post('/foo')` → `/api/plugins/st-trpg-tools/foo`
-
-- **构建配置**：
-  - Webpack 目标为 `'node'`（服务器端）
-  - 输出格式为 CommonJS（`libraryTarget: 'commonjs'`）
-  - 最终构建为 `dist/plugin.js` 单一文件
+- [SillyTavern UI 扩展官方文档](https://docs.sillytavern.app/for-contributors/writing-extensions/)
+- [扩展示例项目](https://github.com/city-unit/st-extension-example)
+- [SillyTavern 官方扩展](https://github.com/search?q=topic%3Aextension+org%3ASillyTavern)

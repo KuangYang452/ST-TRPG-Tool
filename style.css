@@ -1,0 +1,75 @@
+/* ST-TRPG-Tool 扩展样式 */
+
+.trpg-tool-settings {
+    margin: 10px 0;
+}
+
+.trpg-tool-block {
+    margin: 8px 0;
+    align-items: center;
+    gap: 10px;
+}
+
+.trpg-tool-block label {
+    flex: 1;
+    font-size: 14px;
+}
+
+.trpg-dice-section {
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
+}
+
+.trpg-dice-section select {
+    margin-right: 10px;
+    padding: 4px 8px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+}
+
+#trpg_roll_dice {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#trpg_roll_dice:hover {
+    background: #0056b3;
+}
+
+#trpg_dice_result {
+    color: #28a745;
+    font-family: monospace;
+    background: rgba(40, 167, 69, 0.1);
+    padding: 4px 8px;
+    border-radius: 3px;
+    margin-top: 5px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .trpg-tool-block {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .trpg-dice-section {
+        padding: 8px;
+    }
+
+    .trpg-dice-section select {
+        width: 100%;
+        margin-bottom: 8px;
+        margin-right: 0;
+    }
+
+    #trpg_roll_dice {
+        width: 100%;
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "display_name": "ST-TRPG-Tool",
+    "loading_order": 9,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "KuangYang452",
+    "version": "1.0.0",
+    "homePage": "https://github.com/KuangYang452/ST-TRPG-Tool"
+}
