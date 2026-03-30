@@ -106,13 +106,32 @@ interface PluginInfo {
 - **HTTP 端点**：AI 智能体通过 POST 访问 `http://server/plugin-endpoints`
 - **关闭钩子**：服务器终止时调用 `exit()`（如需清理资源）
 
-## 添加新功能的步骤
+## 插件安装说明
 
-1. 在 `init()` 函数中添加新的路由处理器，按照上述模式实现
-2. 根据需要更新 `package.json` 中的版本号和描述
-3. 建立前运行 `npm run lint:fix` 修复代码风格
-4. 使用 `npm run build:dev` 开发构建测试，用 `npm run build` 生产构建
-5. 将 `dist/plugin.js` 放入 SillyTavern 的 `/plugins` 文件夹进行集成测试
+### SillyTavern 安装步骤
+
+1. **构建插件**：运行 `npm run build` 生成生产版本
+2. **复制插件**：将整个项目目录复制到 SillyTavern 的 `/plugins` 文件夹
+3. **启用插件**：确保 `config.yaml` 中设置 `enableServerPlugins: true`
+4. **重启 SillyTavern**：重启服务器以加载插件
+
+### 插件目录结构
+
+```
+plugins/
+└── st-trpg-tools/          # 插件目录名（使用 info.id）
+    ├── index.js           # 插件入口点
+    ├── dist/
+    │   └── plugin.js      # 构建输出
+    ├── package.json       # 插件元数据
+    └── src/               # 源代码（可选）
+```
+
+### 故障排除
+
+- **插件未加载**：检查控制台日志，确认 `enableServerPlugins: true`
+- **路由未注册**：确认插件目录名与 `info.id` 匹配
+- **构建失败**：运行 `npm run build:dev` 查看详细错误信息
 
 ## 代码注释与国际化
 

@@ -2,7 +2,7 @@
     "name": "st-trpg-tool",
     "version": "1.0.0",
     "description": "为 AI 智能体提供 TRPG 工具箱，包括骰子、地图、规则书和角色卡查询等功能。",
-    "main": "dist/plugin.js",
+    "main": "index.js",
     "type": "commonjs",
     "scripts": {
         "build:dev": "webpack --mode development",
