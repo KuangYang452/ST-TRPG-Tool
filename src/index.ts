@@ -18,16 +18,16 @@ const chalk = new Chalk();
 const MODULE_NAME = '[SillyTavern-Example-Plugin]';
 
 /**
- * Initialize the plugin.
+ * 初始化插件。
  * @param router Express Router
  */
 export async function init(router: Router): Promise<void> {
     const jsonParser = bodyParser.json();
-    // Used to check if the server plugin is running
+    // 用于检查服务器插件是否正在运行
     router.post('/probe', (_req, res) => {
         return res.sendStatus(204);
     });
-    // Use body-parser to parse the request body
+    // 使用body-parser解析请求正文
     router.post('/ping', jsonParser, async (req, res) => {
         try {
             const { message } = req.body;
@@ -46,9 +46,9 @@ export async function exit(): Promise<void> {
 }
 
 export const info: PluginInfo = {
-    id: 'example',
-    name: 'Example Plugin',
-    description: 'A simple example plugin for SillyTavern server.',
+    id: 'st-trpg-tools',
+    name: 'ST-TRPG-Tools',
+    description: '这是一个开发中的插件，预计将用来给智能体提供跑团用的工具箱，如骰子、地图、规则书、角色卡查询等等。',
 };
 
 const plugin: Plugin = {
