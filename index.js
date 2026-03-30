@@ -1,21 +1,22 @@
-// ST-TRPG-Tool UI扩展主脚本
-// 为SillyTavern提供TRPG工具箱功能
+// ST-TRPG-Tool UI 扩展主脚本
+// 为 SillyTavern 提供 TRPG 工具箱功能
 
-import { extension_settings, getContext } from "../../../extensions.js";
-import { saveSettingsDebounced } from "../../../../script.js";
+// 获取 SillyTavern 上下文
+const { extension_settings, getContext, saveSettingsDebounced } = SillyTavern.getContext ? SillyTavern.getContext() : 
+    { extension_settings: window.extension_settings, getContext: SillyTavern.getContext, saveSettingsDebounced: window.saveSettingsDebounced };
 
 // 扩展基本信息
+const MODULE_NAME = 'st-trpg-tool';
 const extensionName = "st-trpg-tool";
 const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
+
+// 定义默认设置
 const defaultSettings = {
     diceEnabled: true,
     mapEnabled: false,
     rulesEnabled: false,
     autoRoll: false
 };
-
-// 扩展设置
-let extensionSettings = extension_settings[extensionName];
 
 /**
  * 加载扩展设置

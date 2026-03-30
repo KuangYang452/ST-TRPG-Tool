@@ -11,17 +11,20 @@
 
 ## 安装方法
 
-### 使用 SillyTavern 内置安装器
+### 使用 SillyTavern 内置安装器（推荐）
 
 1. 在 SillyTavern 中打开扩展管理器
-2. 搜索 "ST-TRPG-Tool" 或直接输入仓库 URL
-3. 点击安装
+2. 点击"安装扩展"
+3. 输入仓库 URL：`https://github.com/KuangYang452/ST-TRPG-Tool`
+4. 点击"安装"
+5. 重启 SillyTavern
 
 ### 手动安装
 
 1. 下载或克隆此仓库
-2. 将整个文件夹复制到 `public/scripts/extensions/third-party/` 目录
-3. 重启 SillyTavern
+2. 重命名文件夹为 `st-trpg-tool`（全小写）
+3. 复制到 `public/scripts/extensions/third-party/` 目录
+4. 重启 SillyTavern
 
 ## 使用说明
 

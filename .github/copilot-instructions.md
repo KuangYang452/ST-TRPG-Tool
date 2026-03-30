@@ -410,23 +410,29 @@ try {
 
 ## 扩展安装
 
-### 安装步骤
+### SillyTavern 自动安装（推荐）
 
-1. 克隆或下载仓库
-2. 复制到 `public/scripts/extensions/third-party/`
-3. 重启 SillyTavern
+1. 在 SillyTavern 中打开扩展管理器
+2. 点击"安装扩展"
+3. 输入仓库 URL：`https://github.com/KuangYang452/ST-TRPG-Tool`
+4. 点击"安装"
+5. 重启 SillyTavern
 
 ### 目录结构
+
+SillyTavern 会自动将扩展安装到正确位置：
 
 ```
 SillyTavern/
 └── public/scripts/extensions/third-party/
-    └── st-trpg-tool/
+    └── st-trpg-tool/        # 扩展目录（全小写）
         ├── manifest.json
         ├── index.js
         ├── style.css
-        └── settings.html
+        └── .github/
 ```
+
+**注意**：扩展目录名必须全小写（`st-trpg-tool`），与 manifest.json 中的扩展名一致。
 
 ## 调试
 
