@@ -1,0 +1,30 @@
+<div class="trpg-tool-settings">
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b data-i18n="TRPG工具箱">TRPG工具箱</b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+        <div class="inline-drawer-content">
+            <div class="trpg-tool-block">
+                <label for="trpg_dice_enabled" data-i18n="启用骰子功能">
+                    启用骰子功能
+                </label>
+                <input id="trpg_dice_enabled" type="checkbox" />
+            </div>
+
+            <div class="trpg-dice-section">
+                <select id="trpg_dice_type">
+                    <option value="1d6">1d6</option>
+                    <option value="1d20">1d20</option>
+                    <option value="2d6">2d6</option>
+                </select>
+                <button id="trpg_roll_dice" class="menu_button" data-i18n="投骰子">
+                    投骰子
+                </button>
+                <div id="trpg_dice_result" style="margin-top: 5px;"></div>
+            </div>
+
+            <hr class="sysHR" />
+        </div>
+    </div>
+</div>
