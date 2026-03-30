@@ -15,34 +15,40 @@ interface Plugin {
 }
 
 const chalk = new Chalk();
-const MODULE_NAME = '[SillyTavern-Example-Plugin]';
+const MODULE_NAME = '[ST-TRPG-Tool]';
 
 /**
- * 初始化插件。
- * @param router Express Router
+ * 初始化插件，注册所有路由处理器。
+ * @param router Express Router - SillyTavern 提供的路由实例
  */
 export async function init(router: Router): Promise<void> {
     const jsonParser = bodyParser.json();
-    // 用于检查服务器插件是否正在运行
+    
+    // 探针端点：用于检查插件是否正在运行
     router.post('/probe', (_req, res) => {
         return res.sendStatus(204);
     });
-    // 使用body-parser解析请求正文
+    
+    // 心跳检测端点：验证基本的请求-响应流程
     router.post('/ping', jsonParser, async (req, res) => {
         try {
             const { message } = req.body;
             return res.json({ message: `Pong! ${message}` });
         } catch (error) {
-            console.error(chalk.red(MODULE_NAME), 'Request failed', error);
-            return res.status(500).send('Internal Server Error');
+            console.error(chalk.red(MODULE_NAME), '请求失败', error);
+            return res.status(500).send('内部服务器错误');
         }
     });
 
-    console.log(chalk.green(MODULE_NAME), 'Plugin loaded!');
+    console.log(chalk.green(MODULE_NAME), '插件已加载！');
 }
 
+/**
+ * 插件关闭时调用，用于清理资源。
+ */
 export async function exit(): Promise<void> {
-    console.log(chalk.yellow(MODULE_NAME), 'Plugin exited');
+    console.log(chalk.yellow(MODULE_NAME), '插件已卸载');
+    return Promise.resolve();
 }
 
 export const info: PluginInfo = {

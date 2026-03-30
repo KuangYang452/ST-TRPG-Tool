@@ -1,7 +1,7 @@
 {
-    "name": "plugin-template-webpack",
+    "name": "st-trpg-tool",
     "version": "1.0.0",
-    "description": "Example server plugin.",
+    "description": "为 AI 智能体提供 TRPG 工具箱，包括骰子、地图、规则书和角色卡查询等功能。",
     "main": "dist/plugin.js",
     "type": "commonjs",
     "scripts": {
@@ -12,14 +12,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/SillyTavern/Plugin-WebpackTemplate.git"
+        "url": "git+https://github.com/KuangYang452/ST-TRPG-Tool.git"
     },
-    "author": "Cohee1207",
+    "author": "KuangYang452",
     "license": "AGPL-3.0-or-later",
     "bugs": {
-        "url": "https://github.com/SillyTavern/Plugin-WebpackTemplate/issues"
+        "url": "https://github.com/KuangYang452/ST-TRPG-Tool/issues"
     },
-    "homepage": "https://github.com/SillyTavern/Plugin-WebpackTemplate#readme",
+    "homepage": "https://github.com/KuangYang452/ST-TRPG-Tool#readme",
     "devDependencies": {
         "@eslint/js": "^9.0.0",
         "@types/express": "^4.17.21",
